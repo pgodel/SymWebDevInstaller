@@ -5,7 +5,7 @@
 * (c) Pablo Godel <pablo@servergrove.com>
 * ServerGrove.com
 *
-* Use it as your own risk.
+* Use it at your own risk.
 */
 
 
