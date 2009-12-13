@@ -6,7 +6,7 @@ symfony generate:project myproject --installer=path/to/SymWebDevInstaller.php
 
 or
 
-symfony generate:project myproject --installer=http://github.com/pgodel/SymWebDevInstaller/blob/master/SymWebDevInstaller.php
+symfony generate:project myproject --installer=http://labs.servergrove.com/SymWebDevInstaller/SymWebDevInstaller.php
 
 
 This installer will perform the following steps:
