@@ -35,6 +35,8 @@ $defaultIp = '127.0.0.1';
 $defaultHostname = $projectName.'.local';
 
 $isWindows = false;
+$isLinux = false;
+
 
 if ( isset( $_SERVER['SystemRoot'] ) )
 {
@@ -43,20 +45,25 @@ if ( isset( $_SERVER['SystemRoot'] ) )
 
   $this->logBlock("Windows OS detected at $winDir", 'INFO');
 }
+else
+{
+  $linux = exec( 'uname', $output );
+  $isLinux = strpos( $output[0], 'Linux' ) !== false;
+}
 
 $ipAddress = $this->askAndValidate('What is the IP address for your web project (default: '.$defaultIp.')?'
-, new sfValidatorString( array( 'empty_value' => $defaultIp, 'required' => false ) ), array('style' => 'QUESTION_LARGE'));
+    , new sfValidatorString( array( 'empty_value' => $defaultIp, 'required' => false ) ), array('style' => 'QUESTION_LARGE'));
 
 $this->logBlock("IP address set to $ipAddress", 'INFO');
 
 
 $hostname = $this->askAndValidate('What is the hostname for your web project (default: '.$defaultHostname.')?'
-, new sfValidatorString( array( 'empty_value' => $defaultHostname, 'required' => false ) ), array('style' => 'QUESTION_LARGE'));
+    , new sfValidatorString( array( 'empty_value' => $defaultHostname, 'required' => false ) ), array('style' => 'QUESTION_LARGE'));
 
 $this->logBlock("Hostname set to $hostname", 'INFO');
 
 $apacheConfFile = $this->askAndValidate('Enter the full file name of Apache Web Server configuration file (default: auto-search)?'
-, new sfValidatorString( array( 'required' => false ) ), array('style' => 'QUESTION_LARGE'));
+    , new sfValidatorString( array( 'required' => false ) ), array('style' => 'QUESTION_LARGE'));
 
 $this->logBlock( empty( $apacheConfFile ) ? "Will search for Apache configuration" : "Apache configuration set to $apacheConfFile", 'INFO');
 
@@ -74,21 +81,21 @@ else
 if ( ! file_exists( $hostsFile ) )
 {
   $hostsFile = $this->askAndValidate('Could not find hosts file. Please provide the full path name of the hosts file (press enter to skip this step)'
-  , new sfValidatorFile( array( 'required' => false ) ), array('style' => 'QUESTION_LARGE'));
+      , new sfValidatorFile( array( 'required' => false ) ), array('style' => 'QUESTION_LARGE'));
 }
 else
 {
-$this->logBlock("hosts file set to $hostsFile", 'INFO');
+  $this->logBlock("hosts file set to $hostsFile", 'INFO');
 }
 
 $content = "
 # Added by Symfony Web Developent Environment installer
-$ipAddress $hostname
-";
+    $ipAddress $hostname
+    ";
 
 if ( !empty( $hostsFile )
-&& file_exists( $hostsFile )
-&& $this->askConfirmation("Add '$ipAddress $hostname' to hosts file located at $hostsFile? (y/n)", 'QUESTION_LARGE'))
+    && file_exists( $hostsFile )
+    && $this->askConfirmation("Add '$ipAddress $hostname' to hosts file located at $hostsFile? (y/n)", 'QUESTION_LARGE'))
 {
   if ( ! file_put_contents ( $hostsFile, $content, FILE_APPEND ) )
   {
@@ -96,7 +103,7 @@ if ( !empty( $hostsFile )
   }
   else
   {
-      $this->logBlock("hosts file modified successfully.", 'INFO');
+    $this->logBlock("hosts file modified successfully.", 'INFO');
   }
 }
 else
@@ -112,17 +119,17 @@ if ( empty( $apacheConfFile ) || ! file_exists( $apacheConfFile ) )
   {
 
     $possibleLocations = array(
-    'C:\Program Files\Zend\Apache2\conf\httpd.conf',
+        'C:\Program Files\Zend\Apache2\conf\httpd.conf',
     );
   }
   else
   {
     $possibleLocations = array(
-    '/etc/httpd/conf/httpd.conf',
-    '/etc/apache2/conf/apache.conf',
-    '/usr/local/apache2/conf/httpd.conf',
-    '/usr/local/apache/conf/httpd.conf',
-    '/usr/local/Zend/Apache2/conf/httpd.conf',
+        '/etc/httpd/conf/httpd.conf',
+        '/etc/apache2/conf/apache.conf',
+        '/usr/local/apache2/conf/httpd.conf',
+        '/usr/local/apache/conf/httpd.conf',
+        '/usr/local/zend/apache2/conf/httpd.conf',
     );
   }
 
@@ -143,7 +150,7 @@ if ( empty( $apacheConfFile ) || ! file_exists( $apacheConfFile ) )
 if ( ! file_exists( $apacheConfFile ) )
 {
   $hostsFile = $this->askAndValidate('Could not find hosts file. Please provide the full path name of the hosts file'
-  , new sfValidatorFile(  array( 'required' => false ) ), array('style' => 'QUESTION_LARGE'));
+      , new sfValidatorFile(  array( 'required' => false ) ), array('style' => 'QUESTION_LARGE'));
 }
 
 $content = '
@@ -161,8 +168,8 @@ $content = '
 ';
 
 if ( !empty( $apacheConfFile )
-&& file_exists( $apacheConfFile )
-&& $this->askConfirmation("Add Virtual Host section to $apacheConfFile? (y/n)", 'QUESTION_LARGE'))
+    && file_exists( $apacheConfFile )
+    && $this->askConfirmation("Add Virtual Host section to $apacheConfFile? (y/n)", 'QUESTION_LARGE'))
 {
   if ( ! file_put_contents ( $apacheConfFile, $content, FILE_APPEND ) )
   {
@@ -170,18 +177,15 @@ if ( !empty( $apacheConfFile )
   }
   else
   {
-      $this->logBlock("Apache configured successfully.", 'INFO');
+    $this->logBlock("Apache configured successfully.", 'INFO');
   }
 
 }
 
 if ($this->askConfirmation("Do you want to restart Apache to load the new configuration? (y/n)", 'QUESTION_LARGE'))
 {
-  if ( $isWindows )
-  {
-    $cmd = "";
-  }
-  else
+  $cmd = '';
+  if ( $isLinux )
   {
     $cmd = "service httpd restart";
   }
